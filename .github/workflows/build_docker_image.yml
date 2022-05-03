@@ -26,6 +26,12 @@ on:
 jobs:
   buildx:
     runs-on: ubuntu-latest
+    
+    # 这里用于定义 GITHUB_TOKEN 的权限
+    permissions:
+       packages: write
+       contents: read
+    
     steps:
       -
         name: Checkout
@@ -33,11 +39,6 @@ jobs:
       - name: Get current date
         id: date
         run: echo "::set-output name=today::$(date +'%Y-%m-%d')"
-      
-    # 这里用于定义 GITHUB_TOKEN 的权限
-    permissions:
-       packages: write
-       contents: read
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v1
