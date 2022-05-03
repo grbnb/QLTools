@@ -92,8 +92,8 @@ jobs:
 # 镜像推送时间
           push: ${{ github.event_name != 'pull_request' }}
 # 给清单打上多个标签 [请在secrets中添加DOCKER_IMAGE变量名和值]
-          tags: |
-            ${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}:${{github.event.inputs.tags}}
+          #tags: |
+            #${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}:${{github.event.inputs.tags}}
             
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
