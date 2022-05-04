@@ -23,6 +23,9 @@ on:
         required: true
         default: '1.0'
 
+env:
+  DOCKER_IMAGENAME: ${{ secrets.DOCKER_IMAGENAME }}
+
 jobs:
   buildx:
     runs-on: ubuntu-latest
@@ -68,8 +71,8 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: |
-            #${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGENAME }}
-            ghcr.io/${{ github.repository_owner }}/${{ secrets.DOCKER_IMAGENAME }}
+            #${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGENAME }}
+            ghcr.io/${{ github.repository_owner }}/${{ env.DOCKER_IMAGENAME }}
           # generate Docker tags based on the following events/attributes
           #   nightly, master, pr-2, 1.2.3, 1.2, 1
           tags: |
