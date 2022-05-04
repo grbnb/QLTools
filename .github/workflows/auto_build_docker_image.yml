@@ -1,0 +1,116 @@
+# This is a basic workflow to help you get started with Actions
+
+name: 自动构建镜像到docker仓库和github packages
+  
+# Controls when the action will run. 
+on:
+  # 任意推送都会触发构建
+  #push:
+# 定时调度
+  schedule:
+    # 参考 https://jasonet.co/posts/scheduled-actions/
+    # note: 这里是GMT时间，北京时间减去八小时即可。如北京时间 22:30 => GMT 14:30
+    #- cron: '00 14 * * *' # GMT 14:00 => 北京时间 22:00
+    #- cron: '30 16 * * *' # GMT 16:30（前一天） => 北京时间 00:30
+  
+  # Allows you to run this workflow manually from the Actions tab
+  branches:
+      - 'dockerfile'  # 选择推送tag标签则自动触发运行的分支
+      - 'develop'
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+  
+# 可以手动触发
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'   
+        required: true
+        default: 'warning'
+      tags:
+        description: 'tags：请填写镜像版本号，默认值1.0'
+        required: true
+        default: '1.0'
+  
+env:
+  #DOCKER_IMAGENAME: ${{ secrets.DOCKER_IMAGENAME }}
+  DOCKER_TAGS: ${{ github.event.inputs.tags }}  # 手动触发的tag
+  DOCKER_IMAGENAME: $(echo ${{ github.repository }} | tr '[A-Z]' '[a-z]') 引用GitHub当前项目仓库名为镜像名，并自动大写转换小写
+
+jobs:
+  buildx:
+    runs-on: ubuntu-latest
+    
+    # 这里用于定义 GITHUB_TOKEN 的权限
+    permissions:
+       packages: write
+       contents: read
+    
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v2
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=today::$(date +'%Y-%m-%d')"
+      -
+        name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      -
+        name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+      -
+        name: Available platforms
+        run: echo ${{ steps.buildx.outputs.platforms }}
+      -
+        name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+      - 
+        name: Login to GHCR
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - 
+        name: Extract metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: |
+            #${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGENAME }}
+            ghcr.io/${{ github.repository_owner }}/${{ env.DOCKER_IMAGENAME }}
+          # generate Docker tags based on the following events/attributes
+          #   nightly, master, pr-2, 1.2.3, 1.2, 1
+          tags: |
+            type=schedule,pattern=nightly
+            type=edge
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}}
+      -
+        name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          context: .	# 工作目录
+          file: ./Dockerfile	#构建文件路径
+# 所需要的体系结构，可以在 Available platforms 步骤中获取所有的可用架构
+          platforms: linux/amd64,linux/arm64/v8
+          #platforms: linux/amd64,linux/arm64/v8,linux/arm64/v7
+# 镜像推送时间
+          push: ${{ github.event_name != 'pull_request' }}
+# 给清单打上多个标签
+          tags: |
+            ${{ steps.meta.outputs.tags }}
+          
+          labels: |
+            ${{ steps.meta.outputs.labels }}
+
+
