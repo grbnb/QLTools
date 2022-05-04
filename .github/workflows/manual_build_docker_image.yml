@@ -74,12 +74,12 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: |
-            #${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGENAME }}
-            ghcr.io/${{ github.repository_owner }}/${{ env.DOCKER_IMAGENAME }}
+            #${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGENAME }}    # 推送到docker仓库，如不需要请使用#注释
+            ghcr.io/${{ github.repository_owner }}/${{ env.DOCKER_IMAGENAME }}   # 推送到GitHub packages仓库，如不需要请使用#注释
         # generate Docker tags based on the following events/attributes
         #   nightly, master, pr-2, 1.2.3, 1.2, 1
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
+            type=raw,value=latest
             type=raw,value=${{ github.event.inputs.tags }}
       -
         name: Build and push
