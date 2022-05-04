@@ -74,9 +74,9 @@ jobs:
         uses: docker/metadata-action@v3
         with:
           images: |
-            #${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGENAME }}    # 推送到docker仓库，如不需要请使用#注释
+            ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGENAME }}    # 推送到docker仓库，如不需要请使用#注释
             ghcr.io/${{ github.repository_owner }}/${{ env.DOCKER_IMAGENAME }}   # 推送到GitHub packages仓库，如不需要请使用#注释
-        # generate Docker tags based on the following events/attributes
+        # generate Docker tags based on the following events/attributes   # 提醒：推送到GitHub packages仓库需要打开『 https://github.com/settings/tokens/new?scopes=write:packages 』创建一个 PAT，勾选 write:packages 权限，才可使用。
         #   nightly, master, pr-2, 1.2.3, 1.2, 1
           tags: |
             type=raw,value=latest
@@ -94,17 +94,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
 # 给清单打上多个tags标签  
           tags: ${{ steps.meta.outputs.tags }}
-            # 上面为推送到docker官方仓库，如不需要请务必整行删除！
-            
-            # 下面为推送到GitHub packages仓库，如不需要请务必整行删除！
-            # 打开『 https://github.com/settings/tokens/new?scopes=write:packages 』创建一个 PAT，勾选 write:packages 权限，才可使用。
-          
-          #tags: |
-            #${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGENAME }}:latest
-            #${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGENAME }}:${{ github.event.inputs.tags }}  
-            
-          
-            #ghcr.io/${{ github.repository_owner }}/${{ env.DOCKER_IMAGENAME }}:latest  
-            #ghcr.io/${{ github.repository_owner }}/${{ env.DOCKER_IMAGENAME }}:${{ github.event.inputs.tags }}    
+          labels: ${{ steps.meta.outputs.labels }}
+              
 
 
