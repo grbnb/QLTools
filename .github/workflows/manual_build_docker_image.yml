@@ -67,7 +67,7 @@ jobs:
         name: image Name change
         id: read-docker-image-identifiers   # 去secrets中添加DOCKER_IMAGENAME 镜像名称，自动字母大写转换小写。
         run: |
-          echo DOCKER_IMAGENAME=$(echo ${{ secrets.DOCKER_IMAGENAME }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV     # 去secrets中添加 镜像名称，自动字母大写转换小写。  
+          echo DOCKER_IMAGENAME=$(echo ${{ secrets.DOCKER_IMAGENAME }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
       -
         name: Build and push
         uses: docker/build-push-action@v2
