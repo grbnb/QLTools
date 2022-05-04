@@ -24,7 +24,8 @@ on:
         default: '1.0'
 
 env:
-  DOCKER_IMAGENAME: ${{ secrets.DOCKER_IMAGENAME }}
+  #DOCKER_IMAGENAME: ${{ secrets.DOCKER_IMAGENAME }}
+  DOCKER_IMAGENAME: python-chromium
 
 jobs:
   buildx:
