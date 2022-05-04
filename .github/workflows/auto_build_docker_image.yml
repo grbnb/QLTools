@@ -36,7 +36,7 @@ on:
 env:
   #DOCKER_IMAGENAME: ${{ secrets.DOCKER_IMAGENAME }}    # 去secrets中添加
   DOCKER_TAGS: ${{ github.event.inputs.tags }}  # 手动触发的tag
-  DOCKER_IMAGENAME: $(echo ${{ github.repository }} | tr '[A-Z]' '[a-z]') 引用GitHub当前项目仓库名为镜像名，并自动大写转换小写
+  #DOCKER_IMAGENAME: $(echo ${{ github.repository }} | tr '[A-Z]' '[a-z]') 引用GitHub当前项目仓库名为镜像名，并自动大写转换小写
 
 jobs:
   buildx:
@@ -77,6 +77,12 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      - 
+        name: PrepareReg Names         
+        id: read-docker-image-identifiers         
+        run: |
+          echo DOCKER_IMAGENAME=$(echo ${{ secrets.DOCKER_IMAGENAME }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
+          #echo LASTEST_TAG=$(echo ${{ secrets.DOCKER_IMAGENAME }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
       - 
         name: Extract metadata (tags, labels) for Docker
         id: meta
