@@ -90,11 +90,9 @@ jobs:
           platforms: linux/amd64,linux/arm64/v8
           #platforms: linux/amd64,linux/arm64/v8,linux/arm64/v7
 # 镜像推送时间
-          #push: ${{ github.event_name != 'pull_request' }}
+          push: ${{ github.event_name != 'pull_request' }}
 # 给清单打上多个标签 [请在secrets中添加DOCKER_IMAGE变量名和值]
-          #tags: |
-            #${{ secrets.DOCKER_USERNAME }}/${{ secrets.DOCKER_IMAGE }}:${{github.event.inputs.tags}}
-          push: true
+         
           tags: ghcr.io/${{ github.repository }}:${{github.event.inputs.tags}}
 
-          labels: ${{ steps.meta.outputs.labels }}
+
