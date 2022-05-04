@@ -79,13 +79,12 @@ jobs:
           push: ${{ github.event_name != 'pull_request' }}
 # 给清单打上多个标签    [请在secrets中添加DOCKER_IMAGENAME, 包含的字母尽量使用小写]
           tags: |
-            ## 推送到docker官方仓库，如不需要请使用#注释
-            ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGENAME }}:latest
-            ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGENAME }}:${{ github.event.inputs.tags }}
             
-            ## 推送到GitHub packages仓库，如不需要请使用#注释 
-            ## 打开『 https://github.com/settings/tokens/new?scopes=write:packages 』创建一个 PAT，勾选 write:packages 权限，才可使用。
-            ghcr.io/${{ github.repository_owner }}/${{ env.DOCKER_IMAGENAME }}:latest
-            ghcr.io/${{ github.repository_owner }}/${{ env.DOCKER_IMAGENAME }}:${{ github.event.inputs.tags }}
+            ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGENAME }}:latest   # 推送到docker官方仓库，如不需要请使用#注释
+            ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGENAME }}:${{ github.event.inputs.tags }}  # 推送到docker官方仓库，如不需要请使用#注释
+            
+            
+            ghcr.io/${{ github.repository_owner }}/${{ env.DOCKER_IMAGENAME }}:latest   # 推送到GitHub packages仓库，如不需要请使用#注释
+            ghcr.io/${{ github.repository_owner }}/${{ env.DOCKER_IMAGENAME }}:${{ github.event.inputs.tags }}    # 打开『 https://github.com/settings/tokens/new?scopes=write:packages 』创建一个 PAT，勾选 write:packages 权限，才可使用。
 
 
