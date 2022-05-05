@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: 自动构建镜像到docker仓库和github packages
+name: 自动触发构建镜像到docker仓库和GHCR仓库
   
 # Controls when the action will run. 
 on:
