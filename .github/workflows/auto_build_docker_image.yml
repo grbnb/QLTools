@@ -32,17 +32,12 @@ on:
         description: 'tags：请填写镜像版本号，默认值1.0'
         required: false
         default: '1.0'
-  
-env:
-  #DOCKER_IMAGENAME: ${{ secrets.DOCKER_IMAGENAME }}    # 去secrets中添加
-  DOCKER_TAGS: ${{ github.event.inputs.tags }}  # 手动触发的tag
-  #DOCKER_IMAGENAME: $(echo ${{ github.repository }} | tr '[A-Z]' '[a-z]') 引用GitHub当前项目仓库名为镜像名，并自动大写转换小写
 
 jobs:
   buildx:
     runs-on: ubuntu-latest
     
-    # 这里用于定义 GITHUB_TOKEN 的权限
+    # 定义 GITHUB_TOKEN 的权限
     permissions:
        packages: write
        contents: read
@@ -51,20 +46,21 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v2
-      - name: Get current date
+      - 
+        name: Get current date
         id: date
         run: echo "::set-output name=today::$(date +'%Y-%m-%d')"
-      -
+      - 
         name: Set up QEMU
         uses: docker/setup-qemu-action@v1
-      -
+      - 
         name: Set up Docker Buildx
         id: buildx
         uses: docker/setup-buildx-action@v1
-      -
+      - 
         name: Available platforms
         run: echo ${{ steps.buildx.outputs.platforms }}
-      -
+      - 
         name: Login to DockerHub
         uses: docker/login-action@v1
         with:
@@ -84,13 +80,14 @@ jobs:
           echo DOCKER_IMAGENAME=$(echo ${{ secrets.DOCKER_IMAGENAME }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
       - 
         name: Extract metadata (tags, labels) for Docker
-        id: meta
+        id: meta   # 处理并输出镜像tag版本号
         uses: docker/metadata-action@v3
         with:
           images: |
             ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGENAME }}    #推送到docker仓库，如不需要请使用#注释
             ghcr.io/${{ github.repository_owner }}/${{ env.DOCKER_IMAGENAME }}    #推送到GitHubpackages仓库，如不需要请使用#注释
           # generate Docker tags based on the following events/attributes   # 推送到GitHubpackages仓库，需要打开『 https://github.com/settings/tokens/new?scopes=write:packages 』创建一个 PAT，勾选 write:packages 权限，才可使用。
+          # metadata 使用说明：https://github.com/docker/metadata-action
           #   nightly, master, pr-2, 1.2.3, 1.2, 1
           tags: |
             type=schedule,pattern=nightly
@@ -100,15 +97,15 @@ jobs:
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}}
-      -
+      - 
         name: Build and push
         uses: docker/build-push-action@v2
         with:
           context: .	# 工作目录
           file: ./Dockerfile	#构建文件路径
-# 所需要的体系结构，可以在 Available platforms 步骤中获取所有的可用架构
-          platforms: linux/amd64,linux/arm64/v8
-          #platforms: linux/amd64,linux/arm64/v8,linux/arm64/v7
+# 所需要的体系结构，可以在 Available platforms 步骤中获取所有的可用架构【前提：基础镜像必须要有对应的架构，否则无法构建】
+          platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
+          #platforms可选架构: linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/amd64/v4,linux/arm64,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/mips64le,linux/mips64,linux/arm/v7,linux/arm/v6
 # 镜像推送时间
           push: ${{ github.event_name != 'pull_request' }}
 # 给清单打上多个标签
