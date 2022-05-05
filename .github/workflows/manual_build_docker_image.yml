@@ -1,6 +1,6 @@
 # This is a basic workflow to help you get started with Actions
 
-name: 手动触发构建镜像到docker仓库和github packages
+name: 手动触发构建镜像到docker仓库和GHCR仓库
 
 # Controls when the action will run. 
 on:
@@ -37,7 +37,8 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v2
-      - name: Get current date
+      - 
+        name: Get current date
         id: date
         run: echo "::set-output name=today::$(date +'%Y-%m-%d')"
       -
@@ -70,14 +71,15 @@ jobs:
           echo DOCKER_IMAGENAME=$(echo ${{ secrets.DOCKER_IMAGENAME }} | tr '[:upper:]' '[:lower:]') >> $GITHUB_ENV
       -
         name: Extract metadata (tags, labels) for Docker
-        id: meta
+        id: meta   # 处理并输出镜像tag版本号
         uses: docker/metadata-action@v3
         with:
           images: |
             ${{ secrets.DOCKER_USERNAME }}/${{ env.DOCKER_IMAGENAME }}    # 推送到docker仓库，如不需要请使用#注释
             ghcr.io/${{ github.repository_owner }}/${{ env.DOCKER_IMAGENAME }}   # 推送到GitHub packages仓库，如不需要请使用#注释
         # generate Docker tags based on the following events/attributes   # 提醒：推送到GitHub packages仓库需要打开『 https://github.com/settings/tokens/new?scopes=write:packages 』创建一个 PAT，勾选 write:packages 权限，才可使用。
-        #   nightly, master, pr-2, 1.2.3, 1.2, 1
+        # metadata 使用说明：https://github.com/docker/metadata-action
+        #   latest, tags
           tags: |
             type=raw,value=latest
             type=raw,value=${{ github.event.inputs.tags }}
@@ -87,9 +89,9 @@ jobs:
         with:
           context: .	# 工作目录
           file: ./Dockerfile	#构建文件路径
-# 所需要的体系结构，可以在 Available platforms 步骤中获取所有的可用架构
-          platforms: linux/amd64,linux/arm64/v8
-          #platforms: linux/amd64,linux/arm64/v8,linux/arm64/v7
+# 所需要的体系结构，可以在 Available platforms 步骤中获取所有的可用架构【前提：基础镜像必须要有对应的架构，否则无法构建】
+          platforms: linux/amd64,linux/arm64/v8,linux/arm/v7
+          #platforms可选架构: linux/amd64,linux/amd64/v2,linux/amd64/v3,linux/amd64/v4,linux/arm64,linux/riscv64,linux/ppc64le,linux/s390x,linux/386,linux/mips64le,linux/mips64,linux/arm/v7,linux/arm/v6
 # 镜像推送时间
           push: ${{ github.event_name != 'pull_request' }}
 # 给清单打上多个tags标签  
